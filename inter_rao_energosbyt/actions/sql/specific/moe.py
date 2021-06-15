@@ -3,7 +3,6 @@ from typing import Any, ClassVar, Mapping, Optional, TYPE_CHECKING
 import attr
 
 from inter_rao_energosbyt.actions.sql import ACTION_SQL
-from inter_rao_energosbyt.actions.sql.prepay_params import PrepayParamsBase
 from inter_rao_energosbyt.actions.sql.subscription import GetPdSubscrStatusBase
 
 if TYPE_CHECKING:
