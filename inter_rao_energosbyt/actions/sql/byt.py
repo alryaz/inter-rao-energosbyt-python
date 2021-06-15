@@ -890,7 +890,7 @@ class CalcCharge(DataMapping):
 
 
 @attr.s(kw_only=True, frozen=True, slots=True)
-class SaveIndications(DataMapping):
+class SaveIndications(ResultCodeMappingBase):
     @classmethod
     async def async_request(
         cls,
