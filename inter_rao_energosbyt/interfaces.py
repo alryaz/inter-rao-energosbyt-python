@@ -1,3 +1,28 @@
+__all__ = (
+    "BaseEnergosbytAPI",
+    "Account",
+    "WithAccount",
+    "WithDatedRequests",
+    "AbstractAccountWithBalance",
+    "AbstractAccountWithIndications",
+    "AbstractAccountWithInvoices",
+    "AbstractAccountWithMeters",
+    "AbstractAccountWithPayments",
+    "AbstractAccountWithTariffHistory",
+    "AbstractCalculatableMeter",
+    "AbstractPayment",
+    "AbstractSubmittableMeter",
+    "AbstractBalance",
+    "AbstractInvoice",
+    "AbstractIndication",
+    "AbstractTariffHistoryEntry",
+    "AbstractMeterHistoryEntry",
+    "AbstractMeter",
+    "AbstractMeterZone",
+    "AbstractAccountWithMeterHistory",
+    "AccountID",
+    "SupportedAccountsType",
+)
 import asyncio
 import inspect
 import json
@@ -61,9 +86,8 @@ from inter_rao_energosbyt.util import (
     SupportsLessThan,
 )
 
-TransmittedIndicationsType = Mapping[str, Union[int, float]]
 MeterID = str
-AccountID = str
+AccountID = int
 
 
 #################################################################################
@@ -158,8 +182,8 @@ class Account(Generic[_TAPI]):
 
     @property
     @final
-    def id(self) -> str:
-        return str(self.data.id_service)
+    def id(self) -> AccountID:
+        return self.data.id_service
 
     @property
     @final
@@ -362,7 +386,7 @@ class BaseEnergosbytAPI(ABC):
         self.auth_session: Optional[Login] = None
         self.max_request_attempts: int = max_request_attempts
 
-        self._accounts: Optional[Dict[int, Account]] = None
+        self._accounts: Optional[Dict[AccountID, Account]] = None
 
         self._requests_counter: int = 0
         self.logger: logging.Logger = logging.getLogger(self.__class__.__qualname__)
@@ -705,11 +729,13 @@ class BaseEnergosbytAPI(ABC):
 
         return response
 
-    async def async_get_questions(self, account_id: SupportsInt) -> Dict[int, str]:
-        response = await GetLSQuestions.async_request(
-            self,
-            id_service=int(account_id),
-        )
+    async def async_get_questions(
+        self, account_id: Union[AccountID, SupportsInt]
+    ) -> Dict[int, str]:
+        if not isinstance(account_id, AccountID):
+            account_id = int(account_id)
+
+        response = await GetLSQuestions.async_request(self, id_service=account_id)
 
         return {question_item.id_question: question_item.nm_question for question_item in response}
 
@@ -846,7 +872,7 @@ class BaseEnergosbytAPI(ABC):
     #################################################################################
 
     @property
-    def accounts(self) -> Optional[Mapping[int, Account]]:
+    def accounts(self) -> Optional[Mapping[AccountID, Account]]:
         return None if self._accounts is None else MappingProxyType(self._accounts)
 
     def _create_account_from_data(self, account_data: "LSList") -> Account:
@@ -1318,7 +1344,7 @@ class AbstractCalculatableMeter(_AbstractTransmittingMeterBase, ABC):
     __slots__ = ()
 
     @abstractmethod
-    def _internal_async_calculate_indications(self, **kwargs) -> SupportsFloat:
+    async def _internal_async_calculate_indications(self, **kwargs) -> SupportsFloat:
         pass
 
     async def async_calculate_indications(
