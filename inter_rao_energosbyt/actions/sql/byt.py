@@ -900,6 +900,7 @@ class SaveIndications(DataMapping):
         data: Optional[Mapping[str, Any]] = None,
         query: str = "SaveIndications",
         pr_flat_meter: Any = None,
+        nn_phone: Any = None,
         vl_t1: Any = None,
         vl_t2: Any = None,
         vl_t3: Any = None,
@@ -912,6 +913,7 @@ class SaveIndications(DataMapping):
         :param data: Additional request data
         :param query: Proxy query name (default: query name associated with query class)
         :param pr_flat_meter: Query data element (type(s): int, assumed required)
+        :param nn_phone: Query data element (type(s): str, assumed required)
         :param vl_t1: Query data element (type(s): int, assumed required)
         :param vl_t2: Query data element (type(s): int, optional)
         :param vl_t3: Query data element (type(s): int, optional)
@@ -922,6 +924,9 @@ class SaveIndications(DataMapping):
 
         if data.get("pr_flat_meter") is None and pr_flat_meter is not None:
             data["pr_flat_meter"] = pr_flat_meter
+
+        if data.get("nn_phone") is None and nn_phone is not None:
+            data["nn_phone"] = nn_phone
 
         if data.get("vl_t1") is None and vl_t1 is not None:
             data["vl_t1"] = vl_t1
