@@ -171,7 +171,7 @@ class BytPayment(AbstractPayment, WithAccount["AccountWithBytPayments"]):
     account: "AccountWithBytPayments" = attr.ib(repr=False)
     paid_at: "datetime" = attr.ib()
     amount: float = attr.ib(converter=float)
-    state: Optional[str] = attr.ib(converter=conv_str_optional, default=None)
+    status: Optional[str] = attr.ib(converter=conv_str_optional, default=None)
 
     @classmethod
     def from_response(cls, account: "AccountWithBytPayments", data: Pays):
@@ -181,12 +181,12 @@ class BytPayment(AbstractPayment, WithAccount["AccountWithBytPayments"]):
             account=account,
             paid_at=paid_at,
             amount=amount,
-            state=data.nm_status,
+            status=data.nm_status,
         )
 
     @property
     def is_accepted(self) -> bool:
-        return self.state == "Зачислен"
+        return self.status == "Зачислен"
 
 
 class AccountWithBytPayments(WithBytProxy, AbstractAccountWithPayments[BytPayment], ABC):
