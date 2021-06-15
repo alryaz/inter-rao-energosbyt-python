@@ -493,6 +493,7 @@ class BaseEnergosbytAPI(ABC):
 
         for i in range(max(self.max_request_attempts, 1)):
             attempt = i + 1
+            status = -1
             try:
                 try:
 
@@ -505,10 +506,10 @@ class BaseEnergosbytAPI(ABC):
                         async with self._session.post(
                             request_url, data=post_data, raise_for_status=True
                         ) as response:
+                            status = response.status
                             response_text = await response.text()  # TODO: encoding required?
                             logger.debug(
-                                "[%d] <- (a%d) (%d) %s"
-                                % (counter, attempt, response.status, response_text)
+                                "[%d] <- (a%d) (%d) %s" % (counter, attempt, status, response_text)
                             )
 
                 except aiohttp.ClientError as e:
@@ -525,9 +526,9 @@ class BaseEnergosbytAPI(ABC):
 
                 return response_decoded
 
-            except EnergosbytException:
+            except EnergosbytException as e:
                 logger.error(
-                    "[%d] <- (a%d) (%d) (!!! ERROR !!!)" % (counter, attempt, response.status)
+                    "[%d] <- (a%d) (%d) (!!! ERROR !!!) %r" % (counter, attempt, status, e)
                 )
                 if attempt >= self.max_request_attempts:
                     raise
