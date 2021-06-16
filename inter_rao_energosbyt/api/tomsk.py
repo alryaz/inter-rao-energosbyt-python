@@ -1,4 +1,5 @@
 __all__ = (
+    "API",
     "TomskEnergosbytAPI",
     "TMKNRGAccount",
     "TMKNRGMeter",
@@ -41,6 +42,9 @@ class TomskEnergosbytAPI(BaseEnergosbytAPI):
     AUTH_URL: str = BASE_URL + "/auth"
     REQUEST_URL: str = BASE_URL + "/gate_lkcomu_tmk"
     ACCOUNT_URL: str = BASE_URL + "/accounts"
+
+
+API = TomskEnergosbytAPI
 
 
 class TMKNRGMeter(AbstractBytSubmittableMeter):

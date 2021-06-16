@@ -379,7 +379,7 @@ class BaseEnergosbytAPI(ABC):
         password: str,
         user_agent: Optional[str] = None,
         max_request_attempts: int = 3,
-        max_simultaneous_requests: int = 20,
+        max_simultaneous_requests: int = 10,
     ):
         self.username: str = username
         self.password: str = password
@@ -1307,8 +1307,10 @@ class _AbstractTransmittingMeterBase(AbstractMeter, ABC):
             start, end = self.submission_period
             today = date.today()
 
-            if not (start >= today >= end):
-                raise EnergosbytException("out of period submisson")
+            if not (start <= today <= end):
+                raise EnergosbytException(
+                    f"out of period submisson ({today.isoformat()} not in {start.isoformat()} :: {end.isoformat()})"
+                )
 
         return kwargs
 
@@ -1322,7 +1324,7 @@ class AbstractSubmittableMeter(_AbstractTransmittingMeterBase, ABC):
     __slots__ = ()
 
     @abstractmethod
-    def _internal_async_submit_indications(self, **kwargs) -> Any:
+    async def _internal_async_submit_indications(self, **kwargs) -> Any:
         pass
 
     async def async_submit_indications(

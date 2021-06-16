@@ -25,6 +25,7 @@ from inter_rao_energosbyt.presets.byt import (
     BytAccountBase,
 )
 from inter_rao_energosbyt.presets.smorodina import (
+    AbstractSmorodinaSubmittableMeter,
     AccountWithStaticSmorodinaProxy,
     AccountWithVirtualSmorodinaIndications,
     SmorodinaAccountBase,
@@ -125,8 +126,12 @@ class KSGEletricityAccount(
 #################################################################################
 
 
-class MOEEPDMeter(SmorodinaMeter):
+class MOEEPDMeter(AbstractSmorodinaSubmittableMeter):
     __slots__ = ()
+
+    @property
+    def smorodina_plugin_submit_indications(self) -> str:
+        return "propagateMoeInd"
 
 
 @MoscowEnergosbytAPI.register_supported_account(
@@ -143,8 +148,8 @@ class MOEEPDAccount(
 
     def _create_meter_from_smorodina_data(
         self, meter_data: "AbonentEquipment"
-    ) -> Optional[SmorodinaMeter]:
-        return SmorodinaMeter.from_response(self, meter_data)
+    ) -> Optional[MOEEPDMeter]:
+        return MOEEPDMeter.from_response(self, meter_data)
 
     @property
     def smorodina_plugin_proxy(self) -> str:

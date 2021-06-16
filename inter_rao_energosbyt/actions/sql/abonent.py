@@ -9,6 +9,7 @@ __all__ = (
     "AbonentChargeDetail",
     "AbonentChargeDetailService",
     "AbonentChargeDetailInvoice",
+    "AbonentSaveIndication",
 )
 
 from datetime import date, datetime
@@ -28,7 +29,7 @@ from typing import (
 import attr
 
 from inter_rao_energosbyt.actions import ActionRequest, DataMapping
-from inter_rao_energosbyt.actions._bases import HierarchicalItemsBase
+from inter_rao_energosbyt.actions._bases import HierarchicalItemsBase, ResultCodeMappingBase
 from inter_rao_energosbyt.actions.sql import ACTION_SQL
 from inter_rao_energosbyt.converters import (
     conv_float_optional,
@@ -661,7 +662,7 @@ _AbonentChargeDetailBase.register_parse_type(0, AbonentChargeDetail)
 
 
 @attr.s(kw_only=True, frozen=True, slots=True)
-class AbonentSaveIndication(DataMapping):
+class AbonentSaveIndication(ResultCodeMappingBase):
     __slots__ = ()
 
     @classmethod

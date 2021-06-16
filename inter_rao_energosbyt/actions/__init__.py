@@ -9,7 +9,6 @@ __all__ = (
 )
 
 import keyword
-import warnings
 from types import MappingProxyType
 from typing import (
     Any,
@@ -57,7 +56,6 @@ class ActionResult(Sequence[_TRequest], Generic[_TRequest]):
     meta_data: Mapping[str, Any] = attr.ib(converter=MappingProxyType, default=_empty_mapping)
 
     def __getitem__(self, item):
-        warnings.warn("ITERATION OVER ITEMS" + self.__class__.__name__)
         return self.data.__getitem__(item)
 
     def __len__(self):

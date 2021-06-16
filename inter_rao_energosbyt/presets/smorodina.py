@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import date, datetime
-from typing import Iterable, List, Mapping, Optional, TYPE_CHECKING, Tuple, final
+from typing import Any, Iterable, List, Mapping, Optional, TYPE_CHECKING, Tuple, Union, final
 
 import attr
 
@@ -22,7 +22,9 @@ from inter_rao_energosbyt.interfaces import (
     AbstractAccountWithIndications,
     AbstractAccountWithInvoices,
     AbstractAccountWithPayments,
+    AbstractSubmittableMeter,
     Account,
+    WithAccount,
 )
 from inter_rao_energosbyt.actions.sql.abonent import (
     AbonentChargeDetail,
@@ -32,6 +34,7 @@ from inter_rao_energosbyt.actions.sql.abonent import (
     AbonentEquipment,
     AbonentIndications,
     AbonentPays,
+    AbonentSaveIndication,
 )
 from inter_rao_energosbyt.presets.adapters import AccountWithInvoicesToIndications
 from inter_rao_energosbyt.util import AnyDateArg, extrapolate_zone_id, process_start_end_arguments
@@ -173,9 +176,14 @@ class MeterZoneContainer(AbstractMeterZone):
 
 
 @attr.s(kw_only=True, frozen=True, slots=True, eq=True, order=False)
-class SmorodinaMeter(MeterContainer):
+class SmorodinaMeter(MeterContainer, WithAccount["AccountWithSmorodinaMeters"]):
     checkup: SmorodinaCheckupStatus = attr.ib()
     code: str = attr.ib()
+    zone_id: int = attr.ib()
+    meter_id: int = attr.ib()
+    billing_id: int = attr.ib()
+    _period_end_day: int = attr.ib()
+    _period_start_day: int = attr.ib()
 
     @classmethod
     def from_response(cls, account: "AccountWithSmorodinaMeters", data: "AbonentEquipment"):
@@ -191,13 +199,18 @@ class SmorodinaMeter(MeterContainer):
 
         return cls(
             account=account,
-            id=str(data.id_pu),
+            id=str(data.id_counter) + "_" + str(data.id_counter_zn),
+            zone_id=data.id_counter_zn,
+            meter_id=data.id_counter,
+            billing_id=data.id_billing_counter,
+            period_start_day=data.nn_ind_receive_start,
+            period_end_day=data.nn_ind_receive_end,
             checkup=SmorodinaCheckupStatus(
                 date=checkup_date,
                 year=checkup_date.year,
             ),
             zones={
-                ("t" + str(data.id_counter_zn)): MeterZoneContainer(
+                ("t1"): MeterZoneContainer(
                     name=data.nm_service,
                     last_indication=data.vl_last_indication,
                     today_indication=today_indication,
@@ -205,6 +218,67 @@ class SmorodinaMeter(MeterContainer):
             },
             code=data.nm_factory,
         )
+
+
+class AbstractSmorodinaSubmittableMeter(AbstractSubmittableMeter, SmorodinaMeter, ABC):
+    @property
+    def submission_period(self) -> Tuple["date", "date"]:
+        today = date.today()
+        return (
+            today.replace(day=self._period_start_day),
+            today.replace(day=self._period_end_day),
+        )
+
+    async def async_submit_indications(
+        self,
+        *,
+        t1: Optional[Union[int, float]] = None,
+        ignore_periods: bool = False,
+        ignore_values: bool = False,
+        **kwargs,
+    ) -> Any:
+        return await super().async_submit_indications(
+            t1=t1,
+            ignore_periods=ignore_periods,
+            ignore_values=ignore_values,
+        )
+
+    @property
+    @abstractmethod
+    def smorodina_plugin_submit_indications(self) -> str:
+        pass
+
+    async def _internal_async_submit_indications(
+        self, t1: Optional[Union[int, float]] = None, **kwargs
+    ) -> Any:
+        _, provider = await self.account._internal_async_prepare_smorodina_preset_parameters()
+
+        if t1 is None:
+            t1 = self.zones["t1"].last_indication
+            if t1 is None:
+                t1 = 0.0
+
+        response = await AbonentSaveIndication.async_request(
+            self.account.api,
+            self.smorodina_plugin_submit_indications,
+            provider,
+            dt_indication=datetime.now().isoformat(),
+            id_counter=self.meter_id,
+            id_counter_zn=self.zone_id,
+            id_source=15418,  # predefined value from request ?
+            pr_skip_anomaly=1,
+            pr_skip_err=1,
+            vl_indication=t1,
+        )
+
+        if not response.is_success:
+            raise EnergosbytException(
+                "Could not submit indications",
+                response.kd_result,
+                response.nm_result,
+            )
+
+        return response.nm_result
 
 
 class AccountWithSmorodinaMeters(
@@ -409,11 +483,11 @@ class AccountWithSmorodinaInvoices(
     async def async_get_invoices(
         self, start: AnyDateArg = None, end: AnyDateArg = None
     ) -> List[SmorodinaInvoice]:
-        return await self.async_get_SmorodinaInvoice(start, end)
+        return await self.async_get_smorodina_invoices(start, end)
 
-    async def async_get_SmorodinaInvoice(
+    async def async_get_smorodina_invoices(
         self, start: AnyDateArg = None, end: AnyDateArg = None
-    ) -> Iterable[SmorodinaInvoice]:
+    ) -> List[SmorodinaInvoice]:
         start, end = process_start_end_arguments(start, end, self.timezone)
         proxy, provider = await self._internal_async_prepare_smorodina_preset_parameters()
         response = await AbonentChargeDetail.async_request(
