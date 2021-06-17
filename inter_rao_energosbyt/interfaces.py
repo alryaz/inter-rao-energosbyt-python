@@ -1300,7 +1300,7 @@ class _AbstractTransmittingMeterBase(AbstractMeter, ABC):
         if not ignore_values:
             zones = self.zones
             for zone_id, new_value in kwargs.items():
-                if new_value is None:
+                if new_value is None or zone_id not in zones:
                     continue
                 last_zone_indication = zones[zone_id].last_indication
                 if last_zone_indication is None:
