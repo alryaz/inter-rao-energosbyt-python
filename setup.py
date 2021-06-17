@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 project_id = "inter-rao-energosbyt-python"
 setuptools.setup(
     name=project_id,
-    version="0.0.6",
+    version="0.0.7",
     author="Alexander Ryazanov",
     author_email="alryaz@xavux.com",
     description="Mosenergosbyt API bindings for python",
