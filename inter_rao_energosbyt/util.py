@@ -110,7 +110,7 @@ AnyDateArg = Optional[Union["datetime", "date"]]
 def process_start_end_arguments(
     start: AnyDateArg,
     end: AnyDateArg,
-    timezone: "tzinfo",
+    timezone: Optional["tzinfo"] = None,
     offset: int = 3,
 ) -> Tuple["datetime", "datetime"]:
     if isinstance(end, date):
@@ -121,9 +121,9 @@ def process_start_end_arguments(
         end_dt = datetime.now(timezone)
 
     if isinstance(start, date):
-        start_dt = datetime(start.year, start.month, start.day, tzinfo=timezone)
+        start_dt = datetime(start.year, start.month, start.day, tzinfo=end_dt.tzinfo)
     elif isinstance(start, datetime):
-        start_dt = start.astimezone(timezone)
+        start_dt = start.astimezone(end_dt.tzinfo)
     else:
         start_dt = (end_dt - relativedelta(months=offset + 1)).replace(
             day=1, hour=1, minute=1, second=1, microsecond=0

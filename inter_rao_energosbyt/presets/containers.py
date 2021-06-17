@@ -73,7 +73,7 @@ class InvoiceContainer(AbstractInvoice):
     account: "AbstractAccountWithInvoices" = attr.ib(repr=False)
     period: "date" = attr.ib()
     total: float = attr.ib()
-    id: str = attr.ib(default=None)
+    id: str = attr.ib(converter=conv_str_optional, default=None)
 
     def __attrs_post_init__(self):
         if self.id is None:
