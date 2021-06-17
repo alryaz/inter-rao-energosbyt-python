@@ -192,11 +192,12 @@ class SmorodinaMeter(MeterContainer, WithAccount["AccountWithSmorodinaMeters"]):
 
         today_indication: Optional[float] = None
         last_indications_date = data.dt_last_indication
+        last_indication = data.vl_last_indication
         if last_indications_date is not None:
             last_indications_date = datetime.fromisoformat(last_indications_date).date()
 
             if last_indications_date == date.today():
-                today_indication = data.vl_last_indication
+                today_indication = last_indication
 
         return cls(
             account=account,
@@ -213,10 +214,11 @@ class SmorodinaMeter(MeterContainer, WithAccount["AccountWithSmorodinaMeters"]):
             zones={
                 ("t1"): MeterZoneContainer(
                     name=data.nm_service,
-                    last_indication=data.vl_last_indication,
+                    last_indication=last_indication,
                     today_indication=today_indication,
                 )
             },
+            last_indications_date=last_indications_date,
             code=data.nm_factory,
         )
 
@@ -243,7 +245,9 @@ class SmorodinaMeter(MeterContainer, WithAccount["AccountWithSmorodinaMeters"]):
         return (start_date, end_date)
 
 
-class AbstractSmorodinaSubmittableMeter(SmorodinaMeter, AbstractSubmittableMeter, ABC):
+class AbstractSmorodinaSubmittableMeter(
+    SmorodinaMeter, AbstractSubmittableMeter, WithAccount["AccountWithSmorodinaMeters"], ABC
+):
     async def async_submit_indications(
         self,
         *,
