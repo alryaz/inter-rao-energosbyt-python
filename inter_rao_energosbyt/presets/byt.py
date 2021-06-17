@@ -710,7 +710,7 @@ class AbstractBytSubmittableMeter(
                 value = zone.last_indication or 0.0
             data["vl_" + zone_id] = value
 
-        if kwargs:
+        if any(kwargs.values()):
             raise EnergosbytException("meter does not support extra zones: " + ", ".join(kwargs))
 
         account = self.account
