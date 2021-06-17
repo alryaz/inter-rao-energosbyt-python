@@ -8,6 +8,7 @@ from inter_rao_energosbyt.presets.containers import MeterContainer
 from inter_rao_energosbyt.converters import (
     conv_float_optional,
     conv_float_substitute,
+    conv_int_optional,
     conv_str_optional,
 )
 from inter_rao_energosbyt.exceptions import EnergosbytException
@@ -182,8 +183,8 @@ class SmorodinaMeter(MeterContainer, WithAccount["AccountWithSmorodinaMeters"]):
     zone_id: int = attr.ib()
     meter_id: int = attr.ib()
     billing_id: int = attr.ib()
-    _period_end_day: int = attr.ib()
-    _period_start_day: int = attr.ib()
+    _period_end_day: Optional[int] = attr.ib(converter=conv_int_optional, default=None)
+    _period_start_day: Optional[int] = attr.ib(converter=conv_int_optional, default=None)
 
     @classmethod
     def from_response(cls, account: "AccountWithSmorodinaMeters", data: "AbonentEquipment"):
@@ -219,16 +220,30 @@ class SmorodinaMeter(MeterContainer, WithAccount["AccountWithSmorodinaMeters"]):
             code=data.nm_factory,
         )
 
-
-class AbstractSmorodinaSubmittableMeter(AbstractSubmittableMeter, SmorodinaMeter, ABC):
     @property
     def submission_period(self) -> Tuple["date", "date"]:
         today = date.today()
-        return (
-            today.replace(day=self._period_start_day),
-            today.replace(day=self._period_end_day),
-        )
 
+        start_date = today.replace(day=self._period_start_day or 1)
+
+        period_end_day = self._period_start_day
+
+        if period_end_day is None:
+            end_date = today
+            day = 31
+            while True:
+                try:
+                    end_date = end_date.replace(day=day)
+                    break
+                except ValueError:
+                    day -= 1
+        else:
+            end_date = today.replace(day=period_end_day)
+
+        return (start_date, end_date)
+
+
+class AbstractSmorodinaSubmittableMeter(SmorodinaMeter, AbstractSubmittableMeter, ABC):
     async def async_submit_indications(
         self,
         *,

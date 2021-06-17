@@ -200,7 +200,8 @@ class Account(Generic[_TAPI]):
 
     @property
     def code(self) -> str:
-        return str(self.data.nn_ls) or str(self.id)
+        nn_ls = self.data.nn_ls
+        return (None if nn_ls is None else str(nn_ls)) or str(self.id)
 
     @property
     @final
@@ -850,8 +851,8 @@ class BaseEnergosbytAPI(ABC):
         """Set account description.
 
         :param account_id: Account identifier
-        :param description: Text containing description. Anything evaluating to `False` is automatically
-                            assumed to be an empty description.
+        :param description: Text containing description. Anything evaluating to
+                            `False` is automatically assumed to be an empty description.
         :param update_accounts: Perform accounts update after successful request.
         """
         description = "" if description is None else str(description).strip()

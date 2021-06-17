@@ -368,10 +368,10 @@ class AbonentEquipment(DataMapping):
     nm_service: str = attr.ib(converter=str)
     """Service name"""
 
-    nn_ind_receive_end: int = attr.ib(converter=int)
+    nn_ind_receive_end: Optional[int] = attr.ib(converter=conv_int_optional, default=None)
     """Indications receive end day (of the month)"""
 
-    nn_ind_receive_start: int = attr.ib(converter=int)
+    nn_ind_receive_start: Optional[int] = attr.ib(converter=conv_int_optional, default=None)
     """Indications receive start day (of the month)"""
 
     nn_pu: int = attr.ib(converter=int)
