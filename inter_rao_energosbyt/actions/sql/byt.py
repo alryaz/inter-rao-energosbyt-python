@@ -828,7 +828,7 @@ IndicationType = Union[SupportsInt, SupportsFloat, SupportsInt]
 
 
 @attr.s(kw_only=True, slots=True, frozen=True)
-class CalcCharge(DataMapping):
+class CalcCharge(ResultCodeMappingBase):
     returns_single: ClassVar[bool] = True
 
     @classmethod
