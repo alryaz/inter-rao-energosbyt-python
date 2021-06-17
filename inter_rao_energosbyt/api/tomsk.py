@@ -23,7 +23,7 @@ from inter_rao_energosbyt.presets.byt import (
     AccountWithBytMeters,
     AccountWithBytPayments,
     AccountWithStaticBytProxy,
-    BytInfoDouble,
+    BytAccountWithInfoBase,
     BytPayment,
 )
 from inter_rao_energosbyt.presets.view import (
@@ -68,17 +68,14 @@ class TMKNRGAccount(
     AccountWithBytPayments,
     AccountWithBytIndications,
     AccountWithBytBalance,
+    BytAccountWithInfoBase,
     # AccountWithBytTariffHistory,
 ):
-    __slots__ = ("_byt_plugin_provider", "_byt_only", "_info", "_byt_update_future")
+    __slots__ = ("_byt_plugin_provider", "_byt_only", "_byt_update_future")
 
     @property
     def view_plugin_proxy(self) -> str:
         return "tomskProxy"
-
-    @property
-    def info(self) -> BytInfoDouble:
-        return self._info
 
     def __init__(
         self,
@@ -88,7 +85,6 @@ class TMKNRGAccount(
         **kwargs
     ) -> None:
         super().__init__(*args, **kwargs)
-        self._info = None
         self._byt_only = byt_only
         self._byt_plugin_provider = byt_plugin_provider
         self._byt_update_future: Optional[asyncio.Future] = None

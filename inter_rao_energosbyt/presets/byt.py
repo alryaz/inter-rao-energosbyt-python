@@ -4,6 +4,7 @@ __all__ = (
     "AbstractBytSubmittableMeter",
     "AccountWithBytBalance",
     "AccountWithBytIndications",
+    "AccountWithBytInfo",
     "AccountWithBytInfoFromDouble",
     "AccountWithBytInfoFromSingle",
     "AccountWithBytInvoices",
@@ -12,6 +13,7 @@ __all__ = (
     "AccountWithBytTariffHistory",
     "AccountWithStaticBytProxy",
     "BytAccountBase",
+    "BytAccountWithInfoBase",
     "BytBalance",
     "BytCheckupStatus",
     "BytIndication",
@@ -22,6 +24,7 @@ __all__ = (
     "BytMeterZoneContainer",
     "BytPayment",
     "BytTariffHistoryEntry",
+    "BytZoneInfoContainer",
     "WithBytProxy",
     "WithStaticBytProxy",
 )
@@ -284,7 +287,7 @@ class AccountWithBytIndications(WithBytProxy, AbstractAccountWithIndications[Byt
             return from_response(self, response_item)
 
         # @TODO: add meter code
-        if isinstance(self, _AccountWithBytInfo):
+        if isinstance(self, AccountWithBytInfo):
             info = self.info
             if info is None:
                 info = await self.async_update_info()
@@ -362,20 +365,20 @@ def repr_helper(obj: object, *props: property, name: Optional[str] = None) -> st
 class BytZoneInfoContainer:
     name: str = attr.ib()
     description: str = attr.ib()
-    cost: float = attr.ib(converter=float)
+    tariff: float = attr.ib(converter=float)
     within_name: Optional[str] = attr.ib(converter=conv_str_optional, default=None)
     within_description: str = attr.ib(converter=conv_str_optional, default=None)
-    within_cost: Optional[float] = attr.ib(converter=conv_float_optional, default=None)
+    within_tariff: Optional[float] = attr.ib(converter=conv_float_optional, default=None)
 
     @classmethod
     def from_info(cls, ls_info: "_LSInfoBase", zone_id: str):
         return cls(
             name=getattr(ls_info, f"nm_{zone_id}"),
             description=getattr(ls_info, f"nm_{zone_id}_description"),
-            cost=getattr(ls_info, f"vl_{zone_id}_tariff"),
+            tariff=getattr(ls_info, f"vl_{zone_id}_tariff"),
             within_name=getattr(ls_info, f"nm_{zone_id}_within", None),
             within_description=getattr(ls_info, f"nm_{zone_id}_description_within", None),
-            within_cost=getattr(ls_info, f"vl_{zone_id}_tariff_within", None),
+            within_tariff=getattr(ls_info, f"vl_{zone_id}_tariff_within", None),
         )
 
 
@@ -554,7 +557,7 @@ class BytInfoDouble(_BytInfo[LsInfo]):
 _TBytInfo = TypeVar("_TBytInfo", bound=_BytInfo)
 
 
-class _AccountWithBytInfo(WithBytProxy, Account, ABC, Generic[_TBytInfo]):
+class AccountWithBytInfo(WithBytProxy, Account, ABC, Generic[_TBytInfo]):
     __slots__ = ()
 
     @property
@@ -563,23 +566,27 @@ class _AccountWithBytInfo(WithBytProxy, Account, ABC, Generic[_TBytInfo]):
         pass
 
     @abstractmethod
+    async def async_get_info(self) -> _TBytInfo:
+        pass
+
+    @abstractmethod
     async def async_update_info(self) -> _TBytInfo:
         pass
 
 
-class AccountWithBytInfoFromSingle(_AccountWithBytInfo[BytInfoSingle], ABC):
+class AccountWithBytInfoFromSingle(AccountWithBytInfo[BytInfoSingle], ABC):
     __slots__ = ()
 
-    async def async_update_info(self) -> BytInfoSingle:
+    async def async_get_info(self) -> BytInfoSingle:
         proxy, provider = await self._internal_async_prepare_byt_preset_parameters()
         response = await LSInfo.async_request(self.api, proxy, provider)
         return BytInfoSingle(response)
 
 
-class AccountWithBytInfoFromDouble(_AccountWithBytInfo[BytInfoDouble], ABC):
+class AccountWithBytInfoFromDouble(AccountWithBytInfo[BytInfoDouble], ABC):
     __slots__ = ()
 
-    async def async_update_info(self) -> BytInfoDouble:
+    async def async_get_info(self) -> BytInfoDouble:
         proxy, provider = await self._internal_async_prepare_byt_preset_parameters()
         api = self.api
 
@@ -948,16 +955,7 @@ class AccountWithBytTariffHistory(
         return await self.async_get_byt_tariff_history()
 
 
-class BytAccountBase(
-    AccountWithBytMeters,
-    AccountWithBytPayments,
-    AccountWithBytInvoices,
-    AccountWithBytIndications,
-    AccountWithBytBalance,
-    AccountWithBytTariffHistory,
-    _AccountWithBytInfo,
-    ABC,
-):
+class BytAccountWithInfoBase(AccountWithBytInfo, ABC):
     __slots__ = ("_info",)
 
     def __init__(self, *args, **kwargs) -> None:
@@ -965,5 +963,23 @@ class BytAccountBase(
         self._info = None
 
     @property
-    def info(self):
+    def info(self) -> "_LSInfoBase":
         return self._info
+
+    async def async_update_info(self) -> _TBytInfo:
+        ls_info = await self.async_get_info()
+        self._info = ls_info
+        return ls_info
+
+
+class BytAccountBase(
+    AccountWithBytMeters,
+    AccountWithBytPayments,
+    AccountWithBytInvoices,
+    AccountWithBytIndications,
+    AccountWithBytBalance,
+    AccountWithBytTariffHistory,
+    BytAccountWithInfoBase,
+    ABC,
+):
+    __slots__ = ()
