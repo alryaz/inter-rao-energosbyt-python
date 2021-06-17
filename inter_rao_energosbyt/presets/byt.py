@@ -60,15 +60,6 @@ from inter_rao_energosbyt.actions.sql.byt import (
     SaveIndications,
     TariffHistory,
 )
-from inter_rao_energosbyt.presets.containers import (
-    BalanceContainer,
-    IndicationContainer,
-    InvoiceContainer,
-    MeterContainer,
-    MeterZoneContainer,
-    TariffHistoryEntry,
-    ZoneHistoryEntry,
-)
 from inter_rao_energosbyt.const import META_DISPLAY_NAME
 from inter_rao_energosbyt.converters import (
     conv_float_optional,
@@ -84,17 +75,24 @@ from inter_rao_energosbyt.interfaces import (
     AbstractAccountWithPayments,
     AbstractAccountWithTariffHistory,
     AbstractCalculatableMeter,
-    AbstractSubmittableMeter,
     AbstractPayment,
+    AbstractSubmittableMeter,
     Account,
     WithAccount,
-    WithCalculateIndications,
+)
+from inter_rao_energosbyt.presets.containers import (
+    BalanceContainer,
+    IndicationContainer,
+    InvoiceContainer,
+    MeterContainer,
+    MeterZoneContainer,
+    TariffHistoryEntry,
+    ZoneHistoryEntry,
 )
 from inter_rao_energosbyt.util import AnyDateArg, process_start_end_arguments
 
 if TYPE_CHECKING:
-    # noinspection PyUnresolvedReferences
-    from inter_rao_energosbyt.proxy.byt import _LSInfoBase
+    from inter_rao_energosbyt.actions.sql.byt import _LSInfoBase
 
 _TAccount = TypeVar("_TAccount", bound=Account)
 
@@ -360,6 +358,27 @@ def repr_helper(obj: object, *props: property, name: Optional[str] = None) -> st
     return "<" + name + "(" + values + ")>"
 
 
+@attr.s(kw_only=True, frozen=True, slots=True)
+class BytZoneInfoContainer:
+    name: str = attr.ib()
+    description: str = attr.ib()
+    cost: float = attr.ib(converter=float)
+    within_name: Optional[str] = attr.ib(converter=conv_str_optional, default=None)
+    within_description: str = attr.ib(converter=conv_str_optional, default=None)
+    within_cost: Optional[float] = attr.ib(converter=conv_float_optional, default=None)
+
+    @classmethod
+    def from_info(cls, ls_info: "_LSInfoBase", zone_id: str):
+        return cls(
+            name=getattr(ls_info, f"nm_{zone_id}"),
+            description=getattr(ls_info, f"nm_{zone_id}_description"),
+            cost=getattr(ls_info, f"vl_{zone_id}_tariff"),
+            within_name=getattr(ls_info, f"nm_{zone_id}_within", None),
+            within_description=getattr(ls_info, f"nm_{zone_id}_description_within", None),
+            within_cost=getattr(ls_info, f"vl_{zone_id}_tariff_within", None),
+        )
+
+
 class _BytInfo(ABC, Generic[_TLSInfoBase]):
     __slots__ = ("_ls_info",)
 
@@ -429,6 +448,14 @@ class _BytInfo(ABC, Generic[_TLSInfoBase]):
     @property
     def checkup_year(self) -> Optional[int]:
         return self._ls_info.mpi_year
+
+    @property
+    def zones(self) -> Optional[Mapping[str, BytZoneInfoContainer]]:
+        ls_info = self._ls_info
+        return {
+            zone_id: BytZoneInfoContainer.from_info(ls_info, zone_id)
+            for zone_id in _extract_numerical_zone_ids(ls_info)
+        }
 
 
 class BytInfoSingle(_BytInfo[LSInfo]):
@@ -595,7 +622,9 @@ class BytMeter(MeterContainer, WithAccount["AccountWithBytMeters"]):
 
     @classmethod
     def from_response(
-        cls: Type[_TBytMeter], account: "AccountWithBytMeters", data: "Meters"
+        cls: Type[_TBytMeter],
+        account: "AccountWithBytMeters",
+        data: "Meters",
     ) -> _TBytMeter:
         zone_ids = _extract_numerical_zone_ids(data)
         zones = {

@@ -29,7 +29,6 @@ from inter_rao_energosbyt.presets.smorodina import (
     AccountWithStaticSmorodinaProxy,
     AccountWithVirtualSmorodinaIndications,
     SmorodinaAccountBase,
-    SmorodinaMeter,
 )
 
 if TYPE_CHECKING:

@@ -408,6 +408,10 @@ class BaseEnergosbytAPI(ABC):
         if not self._session.closed:
             await self._session.close()
 
+    @property
+    def session(self) -> aiohttp.ClientSession:
+        return self._session
+
     #################################################################################
     # Abstract API guarding
     #################################################################################
@@ -1309,7 +1313,10 @@ class _AbstractTransmittingMeterBase(AbstractMeter, ABC):
 
             if not (start <= today <= end):
                 raise EnergosbytException(
-                    f"out of period submisson ({today.isoformat()} not in {start.isoformat()} :: {end.isoformat()})"
+                    f"out of period submisson "
+                    f"({today.isoformat()} "
+                    f"not in {start.isoformat()} :: "
+                    f"{end.isoformat()})"
                 )
 
         return kwargs
