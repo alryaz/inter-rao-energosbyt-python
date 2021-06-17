@@ -1158,6 +1158,9 @@ class AbstractInvoice(WithAccount["AbstractAccountWithInvoices"], SupportsLessTh
     def __str__(self) -> str:
         return f"{self.__class__.__name__}[{self.id}]({self.period.isoformat()}, {self.total})"
 
+    def __lt__(self, other: "AbstractInvoice") -> bool:
+        return self.period < other.period
+
     @property
     @abstractmethod
     def period(self) -> "date":
