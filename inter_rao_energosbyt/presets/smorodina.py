@@ -226,7 +226,7 @@ class SmorodinaMeter(MeterContainer, WithAccount["AccountWithSmorodinaMeters"]):
 
         start_date = today.replace(day=self._period_start_day or 1)
 
-        period_end_day = self._period_start_day
+        period_end_day = self._period_end_day
 
         if period_end_day is None:
             end_date = today
