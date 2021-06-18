@@ -35,10 +35,12 @@ from datetime import date, datetime
 from types import MappingProxyType
 from typing import (
     Any,
+    Dict,
     Generic,
     List,
     Mapping,
     Optional,
+    Sequence,
     SupportsFloat,
     TYPE_CHECKING,
     Tuple,
@@ -305,17 +307,125 @@ class AccountWithBytIndications(WithBytProxy, AbstractAccountWithIndications[Byt
         return list(map(_create_indication, response))
 
 
-@attr.s(kw_only=False, frozen=True, slots=True)
+BYT_INVOICE_SECTION = "byt_invoice_section"
+
+
+@attr.s(kw_only=True, frozen=True, slots=True)
+class BytInvoiceDetail:
+    name: str = attr.ib(converter=str)
+    total: float = attr.ib(converter=float)
+    currency: str = attr.ib(converter=str)
+    value: float = attr.ib(converter=float)
+    value_unit: str = attr.ib(converter=str)
+    tariff: float = attr.ib(converter=float)
+    tariff_unit: str = attr.ib(converter=str)
+
+
+@attr.s(kw_only=True, frozen=True, slots=True)
 class BytInvoice(InvoiceContainer, WithAccount["AccountWithBytInvoices"]):
     account: "AccountWithBytInvoices" = attr.ib(repr=False)
+    excess_initial: Optional[float] = attr.ib(
+        converter=conv_float_optional,
+        default=None,
+        metadata={BYT_INVOICE_SECTION: "Сумма переплаты на начало периода"},
+    )
+    excess_total: Optional[float] = attr.ib(
+        converter=conv_float_optional,
+        default=None,
+        metadata={BYT_INVOICE_SECTION: "Итого переплата"},
+    )
+    debt_initial: Optional[float] = attr.ib(
+        converter=conv_float_optional,
+        default=None,
+        metadata={BYT_INVOICE_SECTION: "Сумма задолженности на начало периода"},
+    )
+    paid: Optional[float] = attr.ib(
+        converter=conv_float_optional,
+        default=None,
+        metadata={BYT_INVOICE_SECTION: "Сумма поступивших платежей, учтенных при расчете"},
+    )
+    penalty_charged: Optional[float] = attr.ib(
+        converter=conv_float_optional,
+        default=None,
+        metadata={BYT_INVOICE_SECTION: "Начислено пени"},
+    )
+    penalty_paid: Optional[float] = attr.ib(
+        converter=conv_float_optional,
+        default=None,
+        metadata={BYT_INVOICE_SECTION: "в т.ч.оплачено пени"},
+    )
+    penalty_total: Optional[float] = attr.ib(
+        converter=conv_float_optional,
+        default=None,
+        metadata={BYT_INVOICE_SECTION: "в т.ч.пени"},
+    )
+    penalty_initial: Optional[float] = attr.ib(
+        converter=conv_float_optional,
+        default=None,
+        metadata={BYT_INVOICE_SECTION: "в т.ч.пени на начало периода"},
+    )
+    charged: Optional[float] = attr.ib(
+        converter=conv_float_optional,
+        default=None,
+        metadata={BYT_INVOICE_SECTION: "Всего начислено за текущий период"},
+    )
+    recalculations: Optional[float] = attr.ib(
+        converter=conv_float_optional,
+        default=None,
+        metadata={BYT_INVOICE_SECTION: "Перерасчеты"},
+    )
+    pay_total: Optional[float] = attr.ib(
+        converter=conv_float_optional,
+        default=None,
+        metadata={BYT_INVOICE_SECTION: "Итого к оплате"},
+    )
+    details: Sequence[BytInvoiceDetail] = attr.ib(converter=tuple, factory=tuple)
+
+    @classmethod
+    def byt_invoice_sections(cls) -> Dict[str, str]:
+        invoice_sections = {}
+        for field in attr.fields(cls):
+            invoice_section = field.metadata.get(BYT_INVOICE_SECTION)
+            if invoice_section:
+                invoice_sections[invoice_section] = field.name
+
+        return invoice_sections
 
     @classmethod
     def from_response(cls, account: "AccountWithBytInvoices", data: Invoice) -> "BytInvoice":
+        section_args = {}
+        invoice_sections = cls.byt_invoice_sections()
+        for common_data in data.data_common:
+            try:
+                section_args[invoice_sections[common_data.nm_value]] = common_data.vl_value
+            except KeyError:
+                continue
+
+        invoice_details = []
+        for detail_data_group in data.data_detail:
+            if len(detail_data_group) != 3:
+                # Safeguard to prevent errors
+                continue
+            header, counted, tariff = tuple(detail_data_group)
+            invoice_details.append(
+                BytInvoiceDetail(
+                    name=header.nm_value,
+                    total=header.vl_value,
+                    currency=header.nm_mu,
+                    value=counted.vl_value,
+                    value_unit=counted.nm_mu,
+                    tariff=tariff.vl_value,
+                    tariff_unit=tariff.nm_mu,
+                )
+            )
+
         return cls(
             account=account,
             id=data.id_korr,
             total=data.sm_total,
             period=datetime.fromisoformat(data.dt_period).date(),
+            details=invoice_details,
+            **section_args,
         )
 
 

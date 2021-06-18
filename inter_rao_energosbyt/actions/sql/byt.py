@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from datetime import date, datetime
 from typing import (
     Any,
@@ -19,10 +19,8 @@ import attr
 from inter_rao_energosbyt.actions import (
     DataMapping,
 )
-from inter_rao_energosbyt.actions.sql import (
-    ACTION_SQL,
-)
 from inter_rao_energosbyt.actions._bases import ResultCodeMappingBase
+from inter_rao_energosbyt.actions.sql import ACTION_SQL
 from inter_rao_energosbyt.converters import (
     conv_float_optional,
     conv_float_substitute,
@@ -339,11 +337,8 @@ class Invoice(DataMapping):
         return await api.async_action_map(cls, ACTION_SQL, proxy, data)
 
     id_korr = attr.ib(converter=int, type=int)
-    data_common = attr.ib(type=Tuple[InvoiceDataEntry], converter=_converter__data_common)
-    data_detail = attr.ib(
-        type=List[List[InvoiceDataEntry]],
-        converter=_converter__data_detail,
-    )
+    data_common: Tuple[InvoiceDataEntry] = attr.ib(converter=_converter__data_common)
+    data_detail: List[List[InvoiceDataEntry]] = attr.ib(converter=_converter__data_detail)
     dt_period: str = attr.ib(converter=str)
     sm_total: float = attr.ib(converter=conv_float_substitute, default=0.0)
 

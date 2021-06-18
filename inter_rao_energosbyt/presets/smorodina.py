@@ -577,7 +577,7 @@ class SmorodinaBalance(AbstractBalance):
         return self._data.sm_benefit
 
     @property
-    def recalc(self) -> Optional[float]:
+    def recalculations(self) -> Optional[float]:
         return self._data.sm_recalc
 
 

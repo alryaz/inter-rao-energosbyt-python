@@ -1203,6 +1203,10 @@ class AbstractInvoice(WithAccount["AbstractAccountWithInvoices"], SupportsLessTh
     def service(self) -> Optional[float]:
         return None
 
+    @property
+    def recalculations(self) -> Optional[float]:
+        return None
+
 
 _TInvoice = TypeVar("_TInvoice", bound=AbstractInvoice)
 

@@ -74,6 +74,14 @@ class InvoiceContainer(AbstractInvoice):
     period: "date" = attr.ib()
     total: float = attr.ib()
     id: str = attr.ib(converter=conv_str_optional, default=None)
+    paid: Optional[float] = attr.ib(converter=conv_float_optional, default=None)
+    initial: Optional[float] = attr.ib(converter=conv_float_optional, default=None)
+    charged: Optional[float] = attr.ib(converter=conv_float_optional, default=None)
+    insurance: Optional[float] = attr.ib(converter=conv_float_optional, default=None)
+    benefits: Optional[float] = attr.ib(converter=conv_float_optional, default=None)
+    penalty: Optional[float] = attr.ib(converter=conv_float_optional, default=None)
+    service: Optional[float] = attr.ib(converter=conv_float_optional, default=None)
+    recalculations: Optional[float] = attr.ib(converter=conv_float_optional, default=None)
 
     def __attrs_post_init__(self):
         if self.id is None:
