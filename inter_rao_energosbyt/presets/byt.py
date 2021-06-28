@@ -379,6 +379,11 @@ class BytInvoice(InvoiceContainer, WithAccount["AccountWithBytInvoices"]):
         default=None,
         metadata={BYT_INVOICE_SECTION: "Итого к оплате"},
     )
+    benefits: Optional[float] = attr.ib(
+        converter=conv_float_optional,
+        default=None,
+        metadata={BYT_INVOICE_SECTION: "Льготы"},
+    )
     details: Sequence[BytInvoiceDetail] = attr.ib(converter=tuple, factory=tuple)
 
     @classmethod

@@ -9,7 +9,7 @@ setuptools.setup(
     version="0.0.14",
     author="Alexander Ryazanov",
     author_email="alryaz@xavux.com",
-    description="Mosenergosbyt API bindings for python",
+    description="Inter RAO API bindings for python",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/alryaz/" + project_id,
