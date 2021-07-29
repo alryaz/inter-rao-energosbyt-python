@@ -604,6 +604,11 @@ class BaseEnergosbytAPI(ABC):
         return self.auth_session is not None and self.auth_session.is_success
 
     async def async_authenticate(self) -> None:
+        # This is required to reset session cookie
+        self._session.cookie_jar.clear()
+        async with self._session.get(self.AUTH_URL) as response:
+            pass
+        
         response = (
             await Login.async_request(
                 self,
