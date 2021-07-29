@@ -615,7 +615,7 @@ class BaseEnergosbytAPI(ABC):
                 login=self.username,
                 psw=self.password,
                 vl_device_info={
-                    "appVer": "1.23.0",
+                    "appVer": "1.25.0",
                     "type": "browser",
                     "userAgent": self._session.headers[aiohttp.hdrs.USER_AGENT],
                 },
