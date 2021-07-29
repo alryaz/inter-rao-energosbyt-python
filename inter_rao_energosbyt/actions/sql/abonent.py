@@ -389,7 +389,7 @@ class AbonentEquipment(DataMapping):
     vl_sh_znk: float = attr.ib(converter=float)
     """Unknown (?) (used in numbers presentation / floating point length calculation)"""
 
-    vl_tarif: float = attr.ib(converter=float)
+    vl_tarif: Optional[float] = attr.ib(converter=conv_float_optional, default=None)
     """Meter tariff"""
 
 
