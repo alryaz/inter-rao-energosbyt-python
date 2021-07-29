@@ -10,6 +10,8 @@ from inter_rao_energosbyt.converters import (
     conv_float_substitute,
     conv_int_optional,
     conv_str_optional,
+    conv_datestr,
+    conv_datestr_optional,
 )
 from inter_rao_energosbyt.exceptions import EnergosbytException
 from inter_rao_energosbyt.interfaces import (
@@ -188,13 +190,13 @@ class SmorodinaMeter(MeterContainer, WithAccount["AccountWithSmorodinaMeters"]):
 
     @classmethod
     def from_response(cls, account: "AccountWithSmorodinaMeters", data: "AbonentEquipment"):
-        checkup_date = datetime.fromisoformat(data.dt_mpi).date()
+        checkup_date = conv_datestr(data.dt_mpi)
 
         today_indication: Optional[float] = None
         last_indications_date = data.dt_last_indication
         last_indication = data.vl_last_indication
         if last_indications_date is not None:
-            last_indications_date = datetime.fromisoformat(last_indications_date).date()
+            last_indications_date = conv_datestr(last_indications_date)
 
             if last_indications_date == date.today():
                 today_indication = last_indication
@@ -355,10 +357,7 @@ class SmorodinaIndication(AbstractIndication):
 
     @property
     def epd_date(self) -> Optional["date"]:
-        dt_epd = self._data.dt_epd
-        if dt_epd is None:
-            return None
-        return datetime.fromisoformat(dt_epd).date()
+        return conv_datestr_optional(self._data.dt_epd)
 
     @property
     def zone_id(self) -> str:
@@ -520,7 +519,7 @@ class AccountWithSmorodinaInvoices(
 
         all_invoices = []
         for invoice_group in response:
-            period = datetime.fromisoformat(invoice_group.dt_period).date()
+            period = conv_datestr(invoice_group.dt_period)
             for invoice in invoice_group.child:
                 all_invoices.append(SmorodinaInvoice(self, invoice, period))
 

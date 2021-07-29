@@ -1,3 +1,4 @@
+from datetime import date, datetime
 from types import MappingProxyType
 from typing import (
     Any,
@@ -100,3 +101,9 @@ def conv_float_substitute_non_negative(value: Optional[SupportsFloat]) -> float:
 
 def conv_int_substitute(value: Optional[SupportsInt]) -> int:
     return 0 if value is None else int(value)
+
+def conv_datestr(value: str) -> date:
+    return datetime.fromisoformat(value.partition('.')[0])
+
+def conv_datestr_optional(value: Optional[str]) -> Optional[date]:
+    return conv_datestr(value) if value else None
