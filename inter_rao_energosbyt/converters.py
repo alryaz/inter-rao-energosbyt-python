@@ -102,8 +102,14 @@ def conv_float_substitute_non_negative(value: Optional[SupportsFloat]) -> float:
 def conv_int_substitute(value: Optional[SupportsInt]) -> int:
     return 0 if value is None else int(value)
 
-def conv_datestr(value: str) -> date:
+def conv_dtstr(value: str) -> datetime:
     return datetime.fromisoformat(value.partition('.')[0])
+
+def conv_dtstr_optional(value: Optional[str]) -> Optional[datetime]:
+    return conv_dtstr(value) if value else None
+
+def conv_datestr(value: str) -> date:
+    return conv_dtstr(value).date()
 
 def conv_datestr_optional(value: Optional[str]) -> Optional[date]:
     return conv_datestr(value) if value else None
