@@ -304,11 +304,12 @@ class BaseEnergosbytAPI(ABC):
         "account_groups",
         "attributes_add_account",
         "auth_session",
-        "logger",
         "max_request_attempts",
         "password",
         "username",
     )
+
+    LOGGER: ClassVar[logging.Logger] = logging.getLogger(__name__)
 
     SUPPORTED_ACCOUNTS: ClassVar[SupportedAccountsType] = {(None, None): Account}
 
@@ -390,7 +391,6 @@ class BaseEnergosbytAPI(ABC):
         self._accounts: Optional[Dict[AccountID, Account]] = None
 
         self._requests_counter: int = 0
-        self.logger: logging.Logger = logging.getLogger(self.__class__.__qualname__)
         self._session: aiohttp.ClientSession = aiohttp.ClientSession(
             headers={aiohttp.hdrs.USER_AGENT: user_agent or DEFAULT_USER_AGENT},
             cookie_jar=aiohttp.CookieJar(),
@@ -473,7 +473,7 @@ class BaseEnergosbytAPI(ABC):
     async def async_action_raw(
         self, action: str, query: str, data: Optional[Mapping[str, Any]] = None
     ) -> Mapping[str, Any]:
-        logger = self.logger
+        logger = self.LOGGER
 
         get_params = {"action": action, "query": query}
 

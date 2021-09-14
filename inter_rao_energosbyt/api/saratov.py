@@ -6,6 +6,7 @@ __all__ = (
     "SARElectricityMeter",
 )
 
+import logging
 from datetime import tzinfo
 from typing import TYPE_CHECKING
 
@@ -31,6 +32,8 @@ if TYPE_CHECKING:
 
 class SaratovEnergosbytAPI(BaseEnergosbytAPI):
     __slots__ = ()
+
+    LOGGER = logging.getLogger(__name__)
 
     BASE_URL: str = "https://my.saratovenergo.ru"
     AUTH_URL: str = BASE_URL + "/auth"

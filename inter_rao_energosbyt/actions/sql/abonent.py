@@ -344,7 +344,7 @@ class AbonentEquipment(DataMapping):
     id_counter_zn: int = attr.ib(converter=int)
     """Meter tariff internal identifier"""
 
-    id_indication: int = attr.ib(converter=int)
+    id_indication: Optional[int] = attr.ib(converter=conv_int_optional, default=None)
     """Indication identifier"""
 
     id_pu: int = attr.ib(converter=int)

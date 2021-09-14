@@ -10,6 +10,7 @@ __all__ = (
     "TKOTrashAccount",
 )
 
+import logging
 from datetime import tzinfo
 from typing import Optional, TYPE_CHECKING
 
@@ -41,6 +42,8 @@ if TYPE_CHECKING:
 
 class MoscowEnergosbytAPI(BaseEnergosbytAPI):
     """Программный интерфейс ЕЛК Мосэнергосбыт"""
+
+    LOGGER = logging.getLogger(__name__)
 
     BASE_URL: str = "https://my.mosenergosbyt.ru"
     AUTH_URL: str = BASE_URL + "/auth"

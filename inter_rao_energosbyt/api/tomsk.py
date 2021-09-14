@@ -6,6 +6,7 @@ __all__ = (
 )
 
 import asyncio
+import logging
 from datetime import tzinfo
 from typing import List, Optional, Tuple, Union
 
@@ -37,6 +38,8 @@ from inter_rao_energosbyt.util import AnyDateArg
 
 class TomskEnergosbytAPI(BaseEnergosbytAPI):
     __slots__ = ()
+
+    LOGGER = logging.getLogger(__name__)
 
     BASE_URL: str = "https://my.tomskenergosbyt.ru"
     AUTH_URL: str = BASE_URL + "/auth"

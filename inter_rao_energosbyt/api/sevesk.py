@@ -6,6 +6,7 @@ __all__ = (
     "VLGElectricityMeter",
 )
 
+import logging
 from datetime import tzinfo
 
 import pytz
@@ -28,6 +29,8 @@ from inter_rao_energosbyt.enums import ProviderType, ServiceType
 
 class SeveskEnergosbytAPI(BaseEnergosbytAPI):
     __slots__ = ()
+
+    LOGGER = logging.getLogger(__name__)
 
     BASE_URL: str = "https://lk.sevesk.ru"
     AUTH_URL: str = BASE_URL + "/auth"

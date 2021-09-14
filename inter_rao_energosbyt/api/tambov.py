@@ -6,6 +6,7 @@ __all__ = (
     "TMBElectricityMeter",
 )
 
+import logging
 from datetime import tzinfo
 
 import pytz
@@ -28,6 +29,8 @@ from inter_rao_energosbyt.enums import ProviderType, ServiceType
 
 class TambovEnergosbytAPI(BaseEnergosbytAPI):
     __slots__ = ()
+
+    LOGGER = logging.getLogger(__name__)
 
     BASE_URL: str = "https://my.tesk.su"
     AUTH_URL: str = BASE_URL + "/auth"

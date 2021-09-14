@@ -6,6 +6,7 @@ __all__ = (
     "TIMEZONE",
 )
 
+import logging
 from datetime import tzinfo
 
 import pytz
@@ -27,6 +28,8 @@ TIMEZONE = pytz.timezone("Europe/Moscow")
 
 class OryolEnergosbytAPI(BaseEnergosbytAPI):
     __slots__ = ()
+
+    LOGGER = logging.getLogger(__name__)
 
     BASE_URL: str = "https://my.interrao-orel.ru"
     AUTH_URL: str = BASE_URL + "/auth_url"
