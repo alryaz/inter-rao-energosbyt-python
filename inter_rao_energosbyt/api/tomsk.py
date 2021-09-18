@@ -8,7 +8,7 @@ __all__ = (
 import asyncio
 import logging
 from datetime import tzinfo
-from typing import List, Optional, Tuple, Union
+from typing import ClassVar, List, Optional, Tuple, Union
 
 import pytz
 
@@ -41,10 +41,11 @@ class TomskEnergosbytAPI(BaseEnergosbytAPI):
 
     LOGGER = logging.getLogger(__name__)
 
-    BASE_URL: str = "https://my.tomskenergosbyt.ru"
-    AUTH_URL: str = BASE_URL + "/auth"
-    REQUEST_URL: str = BASE_URL + "/gate_lkcomu_tmk"
-    ACCOUNT_URL: str = BASE_URL + "/accounts"
+    BASE_URL: ClassVar[str] = "https://my.tomskenergosbyt.ru"
+    AUTH_URL: ClassVar[str] = BASE_URL + "/auth"
+    REQUEST_URL: ClassVar[str] = BASE_URL + "/gate_lkcomu_tmk"
+    ACCOUNT_URL: ClassVar[str] = BASE_URL + "/accounts"
+    APP_VERSION: ClassVar[str] = "1.26.0"
 
 
 API = TomskEnergosbytAPI

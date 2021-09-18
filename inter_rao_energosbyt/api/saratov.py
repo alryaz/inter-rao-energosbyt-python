@@ -8,7 +8,7 @@ __all__ = (
 
 import logging
 from datetime import tzinfo
-from typing import TYPE_CHECKING
+from typing import ClassVar, TYPE_CHECKING
 
 import pytz
 
@@ -35,10 +35,11 @@ class SaratovEnergosbytAPI(BaseEnergosbytAPI):
 
     LOGGER = logging.getLogger(__name__)
 
-    BASE_URL: str = "https://my.saratovenergo.ru"
-    AUTH_URL: str = BASE_URL + "/auth"
-    REQUEST_URL: str = BASE_URL + "/gate_lkcomu_sar"
-    ACCOUNT_URL: str = BASE_URL + "/accounts"
+    BASE_URL: ClassVar[str] = "https://my.saratovenergo.ru"
+    AUTH_URL: ClassVar[str] = BASE_URL + "/auth"
+    REQUEST_URL: ClassVar[str] = BASE_URL + "/gate_lkcomu_sar"
+    ACCOUNT_URL: ClassVar[str] = BASE_URL + "/accounts"
+    APP_VERSION: ClassVar[str] = "1.26.0"
 
 
 TIMEZONE = pytz.timezone("Europe/Moscow")

@@ -436,7 +436,9 @@ class BaseEnergosbytAPI(ABC):
     def __init_subclass__(cls, *args, chain_supported_accounts: Optional[bool] = None):
         if not inspect.isabstract(cls):
             bad_attrs = set()
-            for tp, attrs in ((str, ("AUTH_URL", "REQUEST_URL", "BASE_URL", "ACCOUNT_URL")),):
+            for tp, attrs in (
+                (str, ("AUTH_URL", "REQUEST_URL", "BASE_URL", "ACCOUNT_URL", "APP_VERSION")),
+            ):
                 bad_attrs.update([attr for attr in attrs if not isinstance(getattr(cls, attr), tp)])
             if bad_attrs:
                 raise NotImplementedError(
@@ -461,10 +463,11 @@ class BaseEnergosbytAPI(ABC):
     # Constants
     #################################################################################
 
-    AUTH_URL: str = NotImplemented
-    REQUEST_URL: str = NotImplemented
-    BASE_URL: str = NotImplemented
-    ACCOUNT_URL: str = NotImplemented
+    AUTH_URL: ClassVar[str] = NotImplemented
+    REQUEST_URL: ClassVar[str] = NotImplemented
+    BASE_URL: ClassVar[str] = NotImplemented
+    ACCOUNT_URL: ClassVar[str] = NotImplemented
+    APP_VERSION: ClassVar[str] = NotImplemented
 
     #################################################################################
     # Requests
@@ -608,14 +611,14 @@ class BaseEnergosbytAPI(ABC):
         self._session.cookie_jar.clear()
         async with self._session.get(self.AUTH_URL) as response:
             pass
-        
+
         response = (
             await Login.async_request(
                 self,
                 login=self.username,
                 psw=self.password,
                 vl_device_info={
-                    "appVer": "1.25.0",
+                    "appVer": self.APP_VERSION,
                     "type": "browser",
                     "userAgent": self._session.headers[aiohttp.hdrs.USER_AGENT],
                 },

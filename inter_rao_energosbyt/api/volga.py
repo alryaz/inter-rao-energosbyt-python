@@ -8,6 +8,7 @@ __all__ = (
 
 import logging
 from datetime import tzinfo
+from typing import ClassVar
 
 import pytz
 
@@ -32,10 +33,11 @@ class VolgaEnergosbytAPI(BaseEnergosbytAPI):
 
     LOGGER = logging.getLogger(__name__)
 
-    BASE_URL: str = "https://my.esbvolga.ru"
-    AUTH_URL: str = BASE_URL + "/auth"
-    REQUEST_URL: str = BASE_URL + "/gate_lkcomu_vld"
-    ACCOUNT_URL: str = BASE_URL + "/accounts"
+    BASE_URL: ClassVar[str] = "https://my.esbvolga.ru"
+    AUTH_URL: ClassVar[str] = BASE_URL + "/auth"
+    REQUEST_URL: ClassVar[str] = BASE_URL + "/gate_lkcomu_vld"
+    ACCOUNT_URL: ClassVar[str] = BASE_URL + "/accounts"
+    APP_VERSION: ClassVar[str] = "1.26.0"
 
 
 API = VolgaEnergosbytAPI
