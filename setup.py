@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 project_id = "inter-rao-energosbyt-python"
 setuptools.setup(
     name=project_id,
-    version="0.0.21",
+    version="0.0.22",
     author="Alexander Ryazanov",
     author_email="alryaz@xavux.com",
     description="Inter RAO API bindings for python",
