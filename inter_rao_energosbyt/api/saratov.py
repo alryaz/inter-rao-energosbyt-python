@@ -39,7 +39,7 @@ class SaratovEnergosbytAPI(BaseEnergosbytAPI):
     AUTH_URL: ClassVar[str] = BASE_URL + "/auth"
     REQUEST_URL: ClassVar[str] = BASE_URL + "/gate_lkcomu_sar"
     ACCOUNT_URL: ClassVar[str] = BASE_URL + "/accounts"
-    APP_VERSION: ClassVar[str] = "1.26.0"
+    APP_VERSION: ClassVar[str] = "1.29.0"
 
 
 TIMEZONE = pytz.timezone("Europe/Moscow")

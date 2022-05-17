@@ -37,7 +37,7 @@ class TambovEnergosbytAPI(BaseEnergosbytAPI):
     AUTH_URL: ClassVar[str] = BASE_URL + "/auth"
     REQUEST_URL: ClassVar[str] = BASE_URL + "/gate_lkcomu_tmb"
     ACCOUNT_URL: ClassVar[str] = BASE_URL + "/accounts"
-    APP_VERSION: ClassVar[str] = "1.26.0"
+    APP_VERSION: ClassVar[str] = "1.28.1"
 
 
 API = TambovEnergosbytAPI

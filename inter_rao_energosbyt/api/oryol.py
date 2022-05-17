@@ -36,7 +36,7 @@ class OryolEnergosbytAPI(BaseEnergosbytAPI):
     AUTH_URL: ClassVar[str] = BASE_URL + "/auth_url"
     REQUEST_URL: ClassVar[str] = BASE_URL + "/gate_lkcomu_orl"
     ACCOUNT_URL: ClassVar[str] = BASE_URL + "/accounts"
-    APP_VERSION: ClassVar[str] = "1.26.0"
+    APP_VERSION: ClassVar[str] = "1.28.1"
 
 
 @OryolEnergosbytAPI.register_supported_account(
