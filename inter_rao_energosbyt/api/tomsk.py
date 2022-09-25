@@ -62,6 +62,9 @@ class TMKNRGMeter(AbstractBytSubmittableMeter):
 @TomskEnergosbytAPI.register_supported_account(
     provider_type=ProviderType.TMK_NRG,
 )
+@TomskEnergosbytAPI.register_supported_account(
+    provider_type=ProviderType.TMK_RTS
+)
 class TMKNRGAccount(
     AccountWithViewInvoices,
     AccountWithViewPayments,
