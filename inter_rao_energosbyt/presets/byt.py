@@ -805,6 +805,10 @@ class AbstractBytSubmittableMeter(
             today.replace(day=self._period_start_day),
             today.replace(day=self._period_end_day),
         )
+    
+    @property
+    def save_indications_query(self) -> str:
+        return "SaveIndications"
 
     @property
     @abstractmethod
@@ -944,6 +948,7 @@ class AbstractBytSubmittableMeter(
             self.byt_plugin_submit_indications,
             self.account.byt_plugin_provider,
             **request_data,
+            query=self.save_indications_query
         )
 
         if not response.is_success:

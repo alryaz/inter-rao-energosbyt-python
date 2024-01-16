@@ -56,7 +56,11 @@ class TMKNRGMeter(AbstractBytSubmittableMeter):
 
     @property
     def byt_plugin_submit_indications(self) -> str:
-        return "propagateTmkInd"
+        return "propagateBytTmkInd"
+
+    @property
+    def save_indications_query(self) -> str:
+        return "TmkBytSaveIndications"
 
 
 @TomskEnergosbytAPI.register_supported_account(
@@ -117,7 +121,8 @@ class TMKNRGAccount(
             response = (await TmkCheckBytLs.async_request(self.api, id_service=self.id)).single()
 
             if response is None:
-                raise ResponseEmptyException("Could not retrieve byt configuration")
+                raise ResponseEmptyException(
+                    "Could not retrieve byt configuration")
         except BaseException as e:
             byt_update_future.set_exception(e)
             self._byt_update_future = None
@@ -126,6 +131,7 @@ class TMKNRGAccount(
         else:
             self._byt_only = response.byt_only
             result = self.byt_plugin_proxy, response.vl_provider
+            self._byt_plugin_provider = response.vl_provider
             self._byt_update_future.set_result(result)
             self._byt_update_future = None
             return result
@@ -137,7 +143,8 @@ class TMKNRGAccount(
 
         byt_only = self._byt_only
         if byt_only is None:
-            raise EnergosbytException("could not retrieve 'byt_only' parameter")
+            raise EnergosbytException(
+                "could not retrieve 'byt_only' parameter")
 
         tasks = []
         if not byt_only:
@@ -150,3 +157,6 @@ class TMKNRGAccount(
             for invoice_results in await asyncio.gather(*tasks)
             for invoice in invoice_results
         ]
+
+    def _create_meter_from_byt_data(self, meter_data: "Meters") -> TMKNRGMeter:
+        return TMKNRGMeter.from_response(self, meter_data)
