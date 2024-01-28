@@ -13,7 +13,7 @@ from typing import ClassVar, List, Optional, Tuple, Union
 import pytz
 
 from inter_rao_energosbyt.actions.sql.specific.tmk import TmkCheckBytLs
-from inter_rao_energosbyt.enums import ProviderType
+from inter_rao_energosbyt.enums import ProviderType, ServiceType
 from inter_rao_energosbyt.exceptions import EnergosbytException, ResponseEmptyException
 from inter_rao_energosbyt.interfaces import BaseEnergosbytAPI
 from inter_rao_energosbyt.presets.byt import (
@@ -27,6 +27,7 @@ from inter_rao_energosbyt.presets.byt import (
     BytAccountWithInfoBase,
     BytPayment,
 )
+from inter_rao_energosbyt.presets.rts import AccountWithRtsMeters
 from inter_rao_energosbyt.presets.view import (
     AccountWithStaticViewProxy,
     AccountWithViewInvoices,
@@ -65,9 +66,7 @@ class TMKNRGMeter(AbstractBytSubmittableMeter):
 
 @TomskEnergosbytAPI.register_supported_account(
     provider_type=ProviderType.TMK_NRG,
-)
-@TomskEnergosbytAPI.register_supported_account(
-    provider_type=ProviderType.TMK_RTS
+    service_type=ServiceType.EPD
 )
 class TMKNRGAccount(
     AccountWithViewInvoices,
@@ -79,6 +78,7 @@ class TMKNRGAccount(
     AccountWithBytPayments,
     AccountWithBytIndications,
     AccountWithBytBalance,
+    AccountWithRtsMeters,
     BytAccountWithInfoBase,
     # AccountWithBytTariffHistory,
 ):
@@ -109,6 +109,10 @@ class TMKNRGAccount(
     @property
     def byt_plugin_provider(self) -> Optional[str]:
         return self._byt_plugin_provider
+
+    @property
+    def rts_plugin_provider(self) -> Optional[str]:
+        return self.data.vl_provider
 
     async def async_update_byt_preset_parameters(self) -> Tuple[str, str]:
         if self._byt_update_future is not None:

@@ -979,7 +979,9 @@ class AccountWithBytMeters(WithBytProxy, AbstractAccountWithMeters[BytMeter], AB
         }
 
     async def async_get_meters(self) -> Mapping[str, BytMeter]:
-        return await self.async_get_byt_meters()
+        other_meters = await super(AccountWithBytMeters, self).async_get_meters()        
+        byt_meters = await self.async_get_byt_meters()
+        return { **other_meters, **byt_meters }
 
 
 @attr.s(kw_only=True, frozen=True, slots=True)
