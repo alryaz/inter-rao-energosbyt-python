@@ -3,6 +3,7 @@ __all__ = (
     "TomskEnergosbytAPI",
     "TMKNRGAccount",
     "TMKNRGMeter",
+    "TMKRTSMeter",
 )
 
 import asyncio
@@ -27,7 +28,7 @@ from inter_rao_energosbyt.presets.byt import (
     BytAccountWithInfoBase,
     BytPayment,
 )
-from inter_rao_energosbyt.presets.rts import AccountWithRtsMeters
+from inter_rao_energosbyt.presets.rts import AbstractRtsSubmittableMeter, AccountWithRtsMeters
 from inter_rao_energosbyt.presets.view import (
     AccountWithStaticViewProxy,
     AccountWithViewInvoices,
@@ -62,6 +63,13 @@ class TMKNRGMeter(AbstractBytSubmittableMeter):
     @property
     def save_indications_query(self) -> str:
         return "TmkBytSaveIndications"
+    
+class TMKRTSMeter(AbstractRtsSubmittableMeter):
+    __slots__ = ()
+
+    @property
+    def rts_plugin_submit_indications(self) -> str:
+        return "propagateTmkInd"
 
 
 @TomskEnergosbytAPI.register_supported_account(
@@ -164,3 +172,6 @@ class TMKNRGAccount(
 
     def _create_meter_from_byt_data(self, meter_data: "Meters") -> TMKNRGMeter:
         return TMKNRGMeter.from_response(self, meter_data)
+    
+    def _create_meter_from_rts_data(self, meter_data) -> TMKRTSMeter:
+        return TMKRTSMeter.from_response(self, meter_data)

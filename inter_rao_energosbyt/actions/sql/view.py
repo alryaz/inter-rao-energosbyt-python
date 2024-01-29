@@ -25,6 +25,7 @@ from typing import (
 import attr
 
 from inter_rao_energosbyt.actions.sql import ACTION_SQL
+from inter_rao_energosbyt.actions._bases import ResultCodeMappingBase
 from inter_rao_energosbyt.converters import (
     conv_float_optional,
     conv_float_substitute,
@@ -571,7 +572,7 @@ class InfoPayment(DataMapping):
 
 
 @attr.s(kw_only=True, frozen=True, slots=True)
-class TransferIndications(DataMapping):
+class TransferIndications(ResultCodeMappingBase):
     @classmethod
     async def async_request(
         cls,
