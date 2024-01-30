@@ -25,6 +25,7 @@ from typing import (
 import attr
 
 from inter_rao_energosbyt.actions.sql import ACTION_SQL
+from inter_rao_energosbyt.actions._bases import ResultCodeMappingBase
 from inter_rao_energosbyt.converters import (
     conv_float_optional,
     conv_float_substitute,
@@ -352,7 +353,7 @@ class ViewInfoPaymentReceived(DataMapping):
     dt_payment: str = attr.ib(converter=str)
     dt_period: str = attr.ib(converter=str)
     id_separate: Optional[int] = attr.ib(converter=conv_int_optional, default=None)
-    id_service: int = attr.ib(converter=int)
+    id_service: str = attr.ib(converter=str)
     id_service_provider: int = attr.ib(converter=int)
     nn_ls: str = attr.ib(converter=str)
     payment: float = attr.ib(converter=float)
@@ -456,6 +457,37 @@ class ViewHistoryCounter(DataMapping):
             data["id_service_provider"] = id_service_provider
 
         return await api.async_action_map(cls, ACTION_SQL, proxy, data)
+    
+    acc_unit:str = attr.ib(converter=str)
+    capacity:float = attr.ib(converter=float) 
+    coeff_transf: Optional[int] = attr.ib(converter=conv_int_optional, default=None)
+    description: Optional[str] = attr.ib(converter=conv_str_optional, default=None)
+    dt_install:str = attr.ib(converter=str)
+    dt_last_check:str = attr.ib(converter=str)
+    dt_last_transf_ind:str = attr.ib(converter=str)
+    dt_next_check:str = attr.ib(converter=str)
+    dt_start: str = attr.ib(converter=str)
+    id_acc_unit: str = attr.ib(converter=str)
+    id_counter:str = attr.ib(converter=str)
+    id_service:str = attr.ib(converter=str)
+    id_service_provider:int = attr.ib(converter=int)
+    id_tariff_zone:int = attr.ib(converter=int)
+    ind_end_close = attr.ib()
+    ind_start_install = attr.ib()
+    install_location:str = attr.ib(converter=str)
+    install_location:str = attr.ib(converter=str)
+    kd_system:int = attr.ib(converter=int)
+    last_transf_ind:float = attr.ib(converter=float)
+    model:str = attr.ib(converter=str)
+    nm_respons:str = attr.ib(converter=str)
+    nn_ls:str = attr.ib(converter=str)
+    number:str = attr.ib(converter=str)
+    pok_param:int = attr.ib(converter=int)
+    recalibration_int = attr.ib()
+    resource:str = attr.ib(converter=str)
+    service:str = attr.ib(converter=str)
+    service_provider:str = attr.ib(converter=str)
+    tariff_zone:str = attr.ib(converter=str)
 
 
 @attr.s(kw_only=True, frozen=True, slots=True)
@@ -540,7 +572,7 @@ class InfoPayment(DataMapping):
 
 
 @attr.s(kw_only=True, frozen=True, slots=True)
-class TransferIndications(DataMapping):
+class TransferIndications(ResultCodeMappingBase):
     @classmethod
     async def async_request(
         cls,

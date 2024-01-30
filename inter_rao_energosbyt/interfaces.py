@@ -1397,7 +1397,7 @@ class AbstractAccountWithMeters(Account, ABC, Generic[_TMeter]):
 
     @abstractmethod
     async def async_get_meters(self) -> Mapping[str, _TMeter]:
-        pass
+        return {}
 
     async def async_submit_indications(self, **kwargs: Union[int, float]) -> Mapping[str, Any]:
         meters = await self.async_get_meters()

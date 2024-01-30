@@ -162,7 +162,7 @@ class ViewInvoice(AbstractInvoice):
     @property
     def total(self) -> float:
         children = self._data.child
-        return sum(x.sm_to_pay for x in children) if children else 0.0
+        return sum(x.sm_to_pay for x in children if x.sm_to_pay is not None) if children else 0.0
 
 
 class AccountWithViewInvoices(WithViewProxy, AbstractAccountWithInvoices[ViewInvoice], ABC):

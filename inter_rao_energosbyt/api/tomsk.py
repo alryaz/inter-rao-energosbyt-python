@@ -3,6 +3,7 @@ __all__ = (
     "TomskEnergosbytAPI",
     "TMKNRGAccount",
     "TMKNRGMeter",
+    "TMKRTSMeter",
 )
 
 import asyncio
@@ -13,7 +14,7 @@ from typing import ClassVar, List, Optional, Tuple, Union
 import pytz
 
 from inter_rao_energosbyt.actions.sql.specific.tmk import TmkCheckBytLs
-from inter_rao_energosbyt.enums import ProviderType
+from inter_rao_energosbyt.enums import ProviderType, ServiceType
 from inter_rao_energosbyt.exceptions import EnergosbytException, ResponseEmptyException
 from inter_rao_energosbyt.interfaces import BaseEnergosbytAPI
 from inter_rao_energosbyt.presets.byt import (
@@ -27,6 +28,7 @@ from inter_rao_energosbyt.presets.byt import (
     BytAccountWithInfoBase,
     BytPayment,
 )
+from inter_rao_energosbyt.presets.rts import AbstractRtsSubmittableMeter, AccountWithRtsMeters
 from inter_rao_energosbyt.presets.view import (
     AccountWithStaticViewProxy,
     AccountWithViewInvoices,
@@ -61,13 +63,18 @@ class TMKNRGMeter(AbstractBytSubmittableMeter):
     @property
     def save_indications_query(self) -> str:
         return "TmkBytSaveIndications"
+    
+class TMKRTSMeter(AbstractRtsSubmittableMeter):
+    __slots__ = ()
+
+    @property
+    def rts_plugin_submit_indications(self) -> str:
+        return "propagateTmkInd"
 
 
 @TomskEnergosbytAPI.register_supported_account(
     provider_type=ProviderType.TMK_NRG,
-)
-@TomskEnergosbytAPI.register_supported_account(
-    provider_type=ProviderType.TMK_RTS
+    service_type=ServiceType.EPD
 )
 class TMKNRGAccount(
     AccountWithViewInvoices,
@@ -79,6 +86,7 @@ class TMKNRGAccount(
     AccountWithBytPayments,
     AccountWithBytIndications,
     AccountWithBytBalance,
+    AccountWithRtsMeters,
     BytAccountWithInfoBase,
     # AccountWithBytTariffHistory,
 ):
@@ -109,6 +117,10 @@ class TMKNRGAccount(
     @property
     def byt_plugin_provider(self) -> Optional[str]:
         return self._byt_plugin_provider
+
+    @property
+    def rts_plugin_provider(self) -> Optional[str]:
+        return self.data.vl_provider
 
     async def async_update_byt_preset_parameters(self) -> Tuple[str, str]:
         if self._byt_update_future is not None:
@@ -160,3 +172,6 @@ class TMKNRGAccount(
 
     def _create_meter_from_byt_data(self, meter_data: "Meters") -> TMKNRGMeter:
         return TMKNRGMeter.from_response(self, meter_data)
+    
+    def _create_meter_from_rts_data(self, meter_data) -> TMKRTSMeter:
+        return TMKRTSMeter.from_response(self, meter_data)
