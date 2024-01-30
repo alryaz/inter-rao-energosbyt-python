@@ -56,7 +56,7 @@ class RtsMeter(MeterContainer, WithAccount["AccountWithRtsMeters"]):
             kd_system=data.kd_system,
             nn_ls=data.nn_ls,
 
-            id=str(data.id_counter) + "_" + str(data.id_tariff_zone),
+            id=data.id_counter,
             zones={
                 ("t1"): MeterZoneContainer(
                     name="№ %s - %s" % (data.number, data.service),

@@ -353,7 +353,7 @@ class ViewInfoPaymentReceived(DataMapping):
     dt_payment: str = attr.ib(converter=str)
     dt_period: str = attr.ib(converter=str)
     id_separate: Optional[int] = attr.ib(converter=conv_int_optional, default=None)
-    id_service: int = attr.ib(converter=int)
+    id_service: str = attr.ib(converter=str)
     id_service_provider: int = attr.ib(converter=int)
     nn_ls: str = attr.ib(converter=str)
     payment: float = attr.ib(converter=float)
